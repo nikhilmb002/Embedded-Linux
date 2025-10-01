@@ -1,0 +1,22 @@
+🍞 What is BitBake?
+
+	BitBake is the build engine used by the Yocto Project and OpenEmbedded.
+	It is similar to make, but much more powerful and designed for building entire Linux distributions, not just single programs.
+	BitBake reads metadata (recipes, classes, configs) and then:
+		Fetches the source code (from Git, tarballs, etc.).
+		Applies patches if needed.
+		Configures, compiles, and installs software.
+		Packages it into formats like .ipk, .deb, or .rpm.
+
+	🛠️ Key Points
+
+		Recipes (.bb) → Tell BitBake how to build each software component.
+		Tasks → Each recipe has tasks (fetch, configure, compile, package).
+		Layers → Recipes and configs are organized into layers (like meta-yocto, meta-openembedded).
+		BitBake = the "chef" that follows the metadata = recipe book to cook up your Linux distribution.
+
+👉 In short:
+	
+	BitBake = The task executor / build tool for Yocto & OE.
+	It takes instructions (metadata) and produces output (binaries, images, SDKs).
+
