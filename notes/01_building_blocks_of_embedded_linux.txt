@@ -1,0 +1,32 @@
+The 4 Building Blocks of Embedded Linux
+-------------------------------
+
+🐧 The Four Building Blocks of Embedded Linux
+
+When running Linux on an embedded board (like Raspberry Pi, BeagleBone, or STM32MP1), the system is made up of four main parts:
+
+1. Toolchain 🛠️
+
+	A set of programs (compiler, linker, debugger, etc.) used on your PC (host) to create software for your board (target).
+	Think of it as the kitchen tools you need to cook a meal. Without them, you can’t prepare anything.
+
+2. Bootloader 🚀
+
+	The very first program that runs when the board powers on.
+	It sets up the memory, CPU, and devices, then loads the Linux kernel.
+
+	Example: U-Boot (most common in embedded Linux).
+
+3. Kernel ❤️
+
+	The core of Linux.
+	Handles hardware (CPU, memory, devices) and provides services to applications.
+	
+	It’s like the engine of a car — without it, nothing runs.
+
+4. Root Filesystem 📂
+
+	A collection of files, libraries, and applications that sit on top of the kernel.
+	This is what gives you the familiar Linux environment (/bin, /lib, /etc, etc.).
+
+	Think of it as the tools and passengers in the car that use the engine to get work done.
