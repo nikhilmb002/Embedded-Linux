@@ -1,0 +1,423 @@
+1. What is linux device driver ?
+
+	A linux device driver is a kernel module that provides an interface between hardware and the Linux kernel, enabling user-space applications to control hardware using standard system calls like open(), read() and ioctl(). 
+
+
+2. What are the main types of Device Drivers in Linux ?
+
+	In the Linux kernel, device drivers are mainly classified into 3 types based on how daata is transferred.
+
+	1. Character Device Drivers 
+
+		Character drivers transfer data 1 byte (character) at a time. 
+		
+		* Sequential access
+		* No buffering by kernel 
+		* Support system calls : 
+			
+			open()
+			read()
+			write()
+			ioctl()
+
+		* Appears as /dev/xx
+
+		* Example 
+
+			Keyboard
+			Mouse 
+			GPIO
+
+
+	2. Block Device Drivers
+
+		Block drivers transfer data in fixed-size blocks (usually 512 bytes or more)
+
+		* Random access supported
+		* Kernel maintains buffer cache
+		* Used for storage devices 
+		* Supports filesystem mounting 
+	
+		* Example 
+	
+			Hard disks
+			SSD
+
+
+	3. Network Device Drivers 
+
+		Network drivers handle packet based communication. 
+
+		* No /dev file 
+		* works with socket interface 
+		* Uses kernel networking stack 
+		* Sends / receives packet
+	
+		* Example 
+	
+			Ethernet
+			Wi-fi
+			CAN 
+
+
+
+3. Difference between user space and kernel space? 
+
+	In Linux, memory and execution are divided into 2 protected areas 
+	
+		User space   :- Where application run 
+		Kernel space :- Where the OS core runs 
+
+		The seperation exists for security, stability, and isolation
+
+		
+	* User space is where normal application execute 
+
+		* Runs with limited privileges 
+		* Cannot access hardware directly
+		* Cannot access kernel memory 
+		* Uses system calls to request kernel services 
+		* If a user program crashes :- system stays alive 
+
+		Example 
+
+			Our C/C++ programs 
+			Bash, VIM 
+
+	
+		Simple line: user space is the protected area where applications run without direct hardware access. 
+
+	
+	* Kernel space is where the Linux kernel and device driver execute 
+
+		* Runs in privileged mode 
+		* Full access to 
+
+			Hardware 
+			Memory 
+			CPU
+	 
+		* Contains :
+		
+			Scheduler 
+			Memory manager
+			Device drivers
+			File system
+
+		* If kernel crashes :- Entire system crashes 
+
+		Simple Line : kernel space is the privileged area where the Os core and drivers run.
+
+
+
+4. What is a kernel module?
+
+	A kernel module is a piece of code that can be dynamically loaded into or removed from the Linux kernel at runtime, without rebooting the system.
+
+
+
+5. How do you insert and remove a kernel module ?
+
+	Insert (load) a module 
+
+		Using insmod (simple, no dependency handling)
+
+			sudo insmod mydriver.ko
+
+				Load the specified .ko file directly
+				Doesn't resolve dependencies
+				Mostly used for testing 
+
+	
+		Using modprobe 
+
+			sudo modprobe mydriver 
+
+				Automatically loads dependencies 
+				Looks in /lib/modules/$(uname -r)
+				Used in production systems 
+
+			
+			modprobe is preffered over insmod because it handles dependencies 
+
+		
+	Remove (unload) a module 
+
+		Using rmmod 
+
+			sudo rmmod mydriver 
+			
+				Removes the module from kernel memory
+
+
+		Using modprobe -r 
+
+			sudo modprobe -r mydriver 
+
+				Removed module with dependency awareness 
+
+
+		Check Loaded Modules 
+
+			lsmod 
+
+				Show all currently loaded kernel modules
+
+
+	View kernel Logs 
+
+		dmesg 
+
+			Used to see 
+
+				Module load messages 
+				Errors
+				printk() output 
+
+
+
+6. What is insmod vs modprobe ?
+
+	insmod   :- loads a module directly without handling dependencies
+	modprobe :- loads a module along with all required dependencies automatically
+
+
+
+7. what is /dev and how are device files created ?
+
+	/dev is a special directory in Linux that contains device files (device nodes)
+
+	These files represent hardware devices or virtual devices. 
+
+	What is inside a device file ?
+
+		Major number : Identifies which driver 
+		Minor number : Identifies which device handled by that driver 
+
+	Today, device files are created dynamically by udev.
+
+	flow 
+
+		Hardware plugged
+		      ↓
+		Kernel detects device
+     		      ↓
+		uevent generated
+		      ↓
+		udev daemon runs
+		      ↓
+		Device node created in /dev
+
+
+
+8. What are major and minor numbers ?
+
+	In Linux every file in /dev is identified by 2 numbers : 
+
+		* Major number :- tells the linux which driver should handle the device 
+		* Minor number :- tells that drivcer which specific device/instance 
+
+
+	Example : 
+	
+		ls -l /dev/ttyUSB0
+
+		
+		crw-rw---- 1 root dialout 188, 0 ttyUSB0
+                			   ↑   ↑
+		                        Major Minor
+
+				188 :- USB serial driver
+				  0 :- first device of that driver 
+			
+
+	A single driver can manage many devices 
+
+		Example : 
+
+			/dev/ttyS0 -> minor 0
+			/dev/ttyS1 -> minor 1 
+			/dev/ttyS2 -> minor 2 
+		
+			All share the same major number (same driver), but different minor numbers (diff ports)
+
+
+	Major number : Identifies the driver associated with a device file 
+	Minor number : Identifies the specific device instance handled by that driver 
+
+
+
+9. What is udev ?
+
+	udev is a user space device manager that dynamically creates and removes device file in /dev when hardware is added or removed. 
+
+
+	Hardware plugged
+	      ↓
+	Kernel detects device
+	      ↓
+	Kernel sends uevent
+	      ↓
+	udev daemon receives event
+	      ↓
+	udev creates device node in /dev
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	 
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+			
+
+
+
+
+
+
+
+
+
+ 
+		
