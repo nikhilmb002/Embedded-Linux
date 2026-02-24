@@ -1,0 +1,363 @@
+1. Operating System Structures 
+
+	1. Monolithic kernel - Linux 
+	
+		* All core services run in kernel space 
+		* Drivers, filesystems, networking are inside kernel
+		* High perfomance 
+		* Shared address space 
+
+		Linux is technically : monolithi modular kernel 
+
+			because modules can be loaded/unloaded dynamically 
+
+
+	2. Microkernel - FreeRTOS 
+
+		* Minimal services in kernel 
+		* Drivers and services run in user space 
+		* More isolation 
+		* More context switching overhead 
+
+	
+	3. Hybrid Kernel - macOS, Windows 
+
+		* Mix of monolithic and microkernel design 
+		* Some components in kernel 
+		* Some in user space 
+
+
+2. What is the Role of a device driver ?
+
+	A device driver makes hardware respond to a well defined abstraction interface.
+
+	Example system calls exposed to users : 
+
+		read()
+		write()
+		ioctl()
+
+	Drivers : 
+
+		Translate generic request :- hardware specific actions 
+		Are built seperately 
+		Plugged into the kernel when needed
+
+
+3. Mechanism vs Policy
+
+	Driver should provide : 
+
+		Mechanism, not policy 
+
+	Mechanism : what capabilities are provided 
+	Policy    : How these capablities are used 
+
+
+		Example : 
+
+			* TCP/IP provides mechanism 
+			* Servers define policy 
+			* HDD driver provides block access 
+			* Filesystem defines how blocks are organized 
+
+	Why should driveres be policy free ?
+
+		Because drivers must remain generic and reusable 
+
+
+4. Policy free Driver Characteristics 
+
+	A good driver should : 
+
+		* Support synchronous and asynchronous operation 
+		* Allow multiple opens 
+		* Avoid unnecessary abstraction layers 
+		* Often provide user-space utilities for configuration 
+
+
+5. Major roles of the Linux Kernel 
+
+	1. Process management 
+
+		* Create/destroy processes 
+		* Schedule tasks 
+		* Handle process I/O
+
+	2. Memory Management
+
+		* Build virtual address space 
+		* Provide malloc() free()
+		* Manage paging and mapping 
+
+	3. Filesystems 
+
+		Linux follows : Everything is a file 
+
+		Supports : 
+		
+			ext4
+			FAT 
+			NTFS 
+
+			Filesystem abstracts block devices 
+
+	4. Device control 
+
+		The kernel must have : 
+
+			A device driver for every hardware device
+
+		Drivers are endpoints of system operations. 
+
+	5. Networking 
+
+		Kernel responsibilities : 
+
+			* Collect packets
+			* Identity protocol 
+			* Dispatch correctly 
+			* Perform routing and address resolution 
+
+
+6. User Space Roles 
+
+	User space includes : 
+
+		* Application (FTP servers, browser, etc)
+		* Graphics managers 
+		* Utilities interfacing with hardwares 
+
+	User space cannot access hardware directly : 
+
+		It must use : 
+
+			open()
+			read()
+			write()
+			ioctl()
+
+			which triggers system calls 
+
+
+7. Modules vs Built in Drivers 
+
+	Driver : Kernel code controlling hardware 
+
+	may be built into kernel or added at runtime 
+
+	Kernel code loaded dynamically 
+
+		Commands : 
+
+			insmod module.ko
+			rmmod module
+			modprobe module
+		
+		insmod   :- links module to running kernel 
+		rmmod    :- removes module 
+		modprobe :- handles dependencies automatically 
+
+
+8. Split view of the kernel 
+
+	The architecture can be viewed as : 
+
+		User Space
+		    ↓
+		System Call Interface
+		    ↓
+		Kernel Space
+		    - Scheduler
+		    - Memory Manager
+		    - Filesystem
+		    - Networking
+		    - Device Drivers
+		    ↓
+		Hardware
+
+	System calls are synchronous entry points. 
+	Interrupts are asynchronous entry points.
+
+
+9. Why Linux is High Perfomance 
+
+	Because : 
+
+		* Direct function calls inside kernel 
+		* No message passing like microkernel 
+		* Shared memory model 
+		* Drivers execute in kernel space 
+
+		But A bug in driver can crash entire system. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	 

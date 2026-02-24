@@ -1,0 +1,384 @@
+What is a kernel module ?
+
+	A kernel module is loadable kernel code. 
+
+	It : 
+
+		* Runs in kernel space 
+		* Extends kernel functionality 
+		* Can be loaded/unloaded at runtime 
+
+	Commands: 
+
+		insmod module.ko
+		rmmod module
+		modprobe module
+
+	Unlike user applications, modules : 
+
+		* Do not have main()
+		* Do not use libc 
+		* Do not have automatic cleanup 
+
+
+Hello World Module Structure 
+
+	#include <linux/module.h>
+	#include <linux/init.h>
+
+	MODULE_LICENSE("GPL");
+
+	static int __init hello_init(void) {
+
+		printk(KERN_ALERT "Hello World\n"); 
+		return 0;		
+	}
+
+	static void __exit hello_exit(void) {
+
+		printk(KERN_ALERT "Goodbye\n");
+	}
+
+	module_init(hello_init);
+	module_exit(hello_exit);
+
+	
+	Important components 
+
+		* MODULE_LICENSE 
+
+		  Declares module license. 
+
+			* Required to avoid kernel taint 
+			* Some kernel symbols only available to GPL modules 
+
+		* module_init()
+
+			Defines function called when: 
+
+				 insmod module.ko 
+
+			equvalent to program start - but not exactly main()
+
+		* module_exit()
+
+			Called during : 
+
+				 rmmod module 
+
+			unlike user applications : 
+
+				No automatic cleanup 
+				If we forget to free memory, it stays allocated
+
+
+4. Tainted Kernel 
+
+	A kernel becomes tainter when : 
+
+		* Non GPL module is loaded 
+		* Out-of-tree module is loaded
+		* Certain unsafe operations occur 
+
+	Meaning : 
+
+		Kernel developers may refuse to debug issues
+
+	Check taint status : 
+
+		cat /proc/sys/kernel/tainted 
+
+
+5. Module vs Application 
+
+
+	| Feature        | User Application | Kernel Module    |
+	| -------------- | ---------------- | ---------------- |
+	| Entry function | main()           | module_init()    |
+	| Exit function  | return           | module_exit()    |
+	| Uses libc      | Yes              | No               |
+	| printf()       | Yes              | No               |
+	| printk()       | No               | Yes              |
+	| Stack size     | ~2 MB            | ~4 KB            |
+	| Floating point | Allowed          | Not supported    |
+	| Crash impact   | Kills process    | May crash system |
+
+
+6. Kernel Stack Limitations 
+
+	Kernel stack size : 
+
+		~4KB (architecture dependent)
+
+		All nested function calls share this stack. 
+		
+		Therfore: 
+
+			* Do not declare large local arrays
+			* Use dynamic allocation (kmalloc)
+			* Avoid deep recursion 
+
+
+7. Linking a Module into Kernel 
+
+	When using insmod : 
+
+		* Module is loaded into memory 
+		* Symbols are resolved against kernel symbol table 
+		* Linked in memory (not disk)
+		* Unresolved symbols cause failure 
+
+	Diagram in slide shows : 
+
+		* init function executed 
+		* Registers structures 
+		* Cleanup function on removal 
+
+
+8. Kernel Entry Mechanisms 
+	
+	Kernel can be entered in 2 ways : 
+
+		Kernel can be entered in 2 ways: 
+
+			1. System calls 
+
+			Triggered by user space : 
+
+				read()
+				write()
+				ioctl()
+
+			Flow : 
+
+				User -> System Call Handler -> Driver -> Hardware 
+
+			Synchronous 
+
+	
+			2. Interrupts  
+
+			Triggered by hardware : 
+
+				* Network packet 
+				* Keyboard press 
+				* Timer interrupt 
+
+			Flow : 
+
+				Hardware -> Interrupt -> Driver -> Kernel 
+
+			Asynchronous 
+
+
+9. User Space vs Kernel Space 
+
+	Modern processors enforce : 
+
+	* Protection levels 
+	* Seperate address spaces 
+	* Privilege seperation
+	
+	User Space 
+
+	* Lowest privilege level 
+	* Cannot access hardware directly 
+	* Cannot access kernel memory 
+	* Crashes do not affect system
+
+	Kernel Space 
+
+	* Highest privilege (supervisor mode)
+	* Full hardware access 
+	* Full memory accesss 
+	* Entered via syscall or interrupt
+
+		Our driver runs here  
+
+
+10. Concurrency in Kernel 
+
+	Kernel supports: 
+
+		* Multiple processes 
+		* Asynchronous interrupts 
+		* SMP (multiple CPUs)
+	
+	Therefore: 
+		
+		Our driver must be : Reentrant 
+
+	What does reentrant mean ?
+
+		* Multiple threads may enter your driver simultaneously 
+		* Data structures must be protected 
+		* Shared resources must be synchronized 
+
+		Even if your code never sleeps: 
+
+			Interrupts can preempt execution 
+			Other CPUs may run your driver concurrently 
+
+
+11. Why Concurrency is Hard in Kernel ?
+
+	Because : 
+
+		* No automatic memory isolation 
+		* Interrupt context differs from process context 
+		* Must handle : 
+
+			* Race conditions 
+			* Deadlocks 
+			* Priority inversion 
+
+		   This leads into spinlocks, mutexes, etc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

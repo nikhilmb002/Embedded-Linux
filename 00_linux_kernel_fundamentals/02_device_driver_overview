@@ -1,0 +1,194 @@
+Devices in Linux belongs to specific classes 
+
+	Each class : 
+
+		Share common access methods 
+		Uses a defined abstraction model 
+
+	The 3 primary device classes are : 
+
+	
+	1. Character Devices 
+
+		Accesssed as a stream of bytes 
+
+		They behave like files to user space
+
+		Typical Operations : 
+
+			open()
+			read()	
+			write()
+			close()
+
+		Examples: 
+
+			/dev/console 
+			/dev/ttyS0
+
+		Key characteristics 
+
+			* Sequential access 
+			* May not support seeking 
+			* Suitable for UART, GPIO, sensors
+
+
+	2. Block Devices 
+
+		Used for storage devices 
+
+		Characteristics : 
+
+			Data transfers occur in fixed-size blocks 
+			Usually 512 bytes or more 
+			Can host filesystems 
+
+		Example: 
+
+			/dev/sda1
+
+		Important: 
+
+			kernel manages split block handling if user requests smaller size 
+
+		Used for : 
+
+			HDD 
+			SDD 
+			SD Cards 
+
+	3. Network Devices 
+
+		Network devices are different 
+
+		Characteristics : 
+
+			Handle packets (not byte streams)
+			Identified by names like eth0 
+			No entry in /dev
+			May be hardware or software (loopback)
+
+		Why no /dev entry ?
+
+			Because packet I/O doesn't map well to : 
+				
+				read ()
+				write()
+
+			Networking is event driven & packet oriented 
+
+
+3. Kernel Filesystems 
+
+	Kernel filesystem layer : 
+
+		* Maps low-level disk blocks
+		* Organizes directories and files 
+		* Independent of hardware transfer mechanism 
+
+	Meaning : 
+
+		Filesystem does not care whether data comes from : 
+
+			* SATA 
+			* USB 
+			* SD card 
+
+		It only interacts with the block device driver 
+
+		This is abstraction at work. 
+
+
+4. Driver Security Concerns 
+
+	The kernel is : 
+
+		The critical point of exploit. 
+
+	Important points :
+
+		Only authorized users can load modules 
+		Drivers typically should not encode security policy 
+		System administrator enforces access via device permissions 
+
+	Exceptions : 
+
+		Global resource changes (interrupt lines)
+		Firmware updates 
+
+
+5. Security Best Practices for Drivers 
+
+	1. Never trust user data 
+	
+		validate everything from user space 
+
+	2. Prevent unauthorized memory writes 
+
+		Never allow user write outside permitted areas. 
+
+	3. Zero memory before exposing it 
+
+		Prevents information leakage 
+
+		Example : 
+
+			memset(buffer, 0, size);
+
+	4. Length checking before copying 
+
+		Always validate length before : 
+
+			copy_from_user()
+			copy_to_user()
+
+		Prevents buffer overflow 
+
+
+6. Buffer Overrun 
+
+	A bufer overrun occurs when : 
+
+		* Data exceeds allocated memory 
+		* Overwrites adjacent stack variables 
+		* Can overwrite return address 
+		* Enables execution of malicious code 
+	
+		This is extremely dangerous in kernel space.
+
+		Because : 
+
+			Kernel memory corruption can crash entire system. 
+
+
+7. Kernel Versioning 
+
+	old even/odd scheme is obsolete. 
+
+	Now kernel versioning uses : 
+
+		major.minor.patch
+
+	Example : 
+
+		6.6.12
+
+	Important for drivers : 
+
+		* Module must match kernel version 
+		* Vermangic ensures compatibility 
+		* Otherwise: "Invalid module format"
+
+
+8. Kernel Licensing 
+
+	Linux is licensed under: 
+
+		GNU General Public License (GPL v2)
+
+	Key points : 
+
+		we can redistribute and sell 
+		must provide source code 
+		derived works must also be GPL 
+
